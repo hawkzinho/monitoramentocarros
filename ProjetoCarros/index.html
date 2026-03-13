@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoEstoque</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="imageCompressor.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ══ NAVBAR ══════════════════════════════ -->
+<nav class="navbar">
+  <div class="navbar-brand">AUTO<span>ESTOQUE</span></div>
+  <div class="navbar-nav">
+    <a class="nav-link active">Estoque</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="navUserEmail" style="font-size:11px;color:#4a6a85;font-weight:500"></span>
+    <button class="nav-btn" onclick="abrirModalCadastro()">+ Cadastrar Veículo</button>
+    <button class="nav-btn" style="background:#0a2d4a;border:1px solid #1a3a52" onclick="fazerLogout()">Sair</button>
+  </div>
+</nav>
+
+<!-- ══ STATS BAR ════════════════════════════ -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-label">Total em Estoque</div>
+    <div class="stat-value" id="statTotal">—</div>
+    <div class="stat-sub" id="statTotalSub">carregando...</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Disponíveis</div>
+    <div class="stat-value" id="statDisponiveis">—</div>
+    <div class="stat-sub" id="statDisponiveisSub">—</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Vendidos (mês)</div>
+    <div class="stat-value" id="statVendidos">—</div>
+    <div class="stat-sub" id="statVendidosSub">—</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-label">Lucro Estimado</div>
+    <div class="stat-value green" id="statLucro">—</div>
+    <div class="stat-sub" id="statLucroSub">—</div>
+  </div>
+</div>
+
+<!-- ══ FILTERS ═══════════════════════════════ -->
+<div class="filters-bar">
+  <span class="filter-label">Filtrar:</span>
+  <input class="filter-input" type="text" id="filtroTexto" placeholder="Marca, modelo ou placa…" oninput="filtrar()" />
+  <select class="filter-input" id="filtroStatus" onchange="filtrar()">
+    <option value="">Todos os Status</option>
+    <option value="disponivel">Disponível</option>
+    <option value="reservado">Reservado</option>
+    <option value="vendido">Vendido</option>
+    <option value="manutencao">Manutenção</option>
+  </select>
+  <select class="filter-input" id="filtroMarca" onchange="filtrar()">
+    <option value="">Todas as Marcas</option>
+  </select>
+  <select class="filter-input" id="filtroOrdem" onchange="filtrar()" style="margin-left:auto">
+    <option value="criado_em_desc">Mais recente</option>
+    <option value="preco_venda_desc">Preço ↓</option>
+    <option value="preco_venda_asc">Preço ↑</option>
+    <option value="km_asc">Km ↑</option>
+  </select>
+</div>
+
+<!-- ══ MAIN ══════════════════════════════════ -->
+<div class="main-content">
+  <div class="section-header">
+    <span class="section-title">Veículos em Estoque</span>
+    <span class="section-count" id="sectionCount">0 VEÍCULOS</span>
+  </div>
+  <div id="loadingState" class="empty-state">
+    <div class="empty-icon">⏳</div>
+    <div class="empty-title">Carregando estoque…</div>
+  </div>
+  <div id="emptyState" class="empty-state" style="display:none">
+    <div class="empty-icon">🚗</div>
+    <div class="empty-title">Nenhum veículo encontrado</div>
+    <div class="empty-desc">Cadastre o primeiro veículo ou ajuste os filtros.</div>
+    <button class="nav-btn" style="margin-top:16px" onclick="abrirModalCadastro()">+ Cadastrar Veículo</button>
+  </div>
+  <div class="cards-grid" id="cardsGrid" style="display:none"></div>
+</div>
+
+<!-- ══ MODAL DETALHES ════════════════════════ -->
+<div class="modal-overlay" id="modalDetalhes">
+  <div class="modal-box modal-large">
+    <div class="modal-header">
+      <span class="modal-title" id="modalDetalhesTitle">Detalhes</span>
+      <button class="modal-close" onclick="fecharModal('modalDetalhes')">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="trocarAba('detInfos', this)">Informações</button>
+      <button class="modal-tab" onclick="trocarAba('detFotos', this)">Fotos da Galeria</button>
+      <button class="modal-tab" onclick="trocarAba('detDespesas', this)">Despesas</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- ABA: Informações -->
+      <div id="detInfos" class="tab-panel active">
+        <div id="modalDetalhesBody"></div>
+      </div>
+
+      <!-- ABA: Fotos -->
+      <div id="detFotos" class="tab-panel">
+        <div id="galeriaFotos" class="galeria-grid"></div>
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+          <label class="form-label" style="margin-bottom:8px;display:block">Adicionar fotos (até 6 no total)</label>
+          <input class="form-input" type="file" id="inputNovasFotos" accept="image/*" multiple onchange="uploadGaleria(event)" />
+          <div id="galeriaUploadStatus" style="margin-top:8px;font-size:12px;color:var(--green);display:none"></div>
+        </div>
+      </div>
+
+      <!-- ABA: Despesas -->
+      <div id="detDespesas" class="tab-panel">
+        <div id="listaDespesas" style="margin-bottom:16px"></div>
+        <div class="despesa-form">
+          <div class="form-label" style="margin-bottom:12px">Nova despesa</div>
+          <div style="display:grid;grid-template-columns:1fr 160px auto;gap:10px;align-items:end">
+            <div>
+              <label class="form-label">Descrição</label>
+              <input class="form-input" type="text" id="despDescricao" placeholder="Ex: Troca de óleo, IPVA, Funilaria…" />
+            </div>
+            <div>
+              <label class="form-label">Valor</label>
+              <input class="form-input" type="text" id="despValor" placeholder="R$ 0,00" oninput="mascaraDinheiro(this)" />
+            </div>
+            <button class="btn-primary" style="padding:10px 18px;white-space:nowrap" onclick="adicionarDespesa()">+ Adicionar</button>
+          </div>
+          <div id="despesaErro" style="display:none;margin-top:8px;font-size:12px;color:#e74c3c;font-weight:500"></div>
+        </div>
+        <div id="totalDespesas" class="despesa-total"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL CADASTRO / EDIÇÃO ═══════════════ -->
+<div class="modal-overlay" id="modalCadastro">
+  <div class="modal-box modal-large">
+    <div class="modal-header">
+      <span class="modal-title" id="modalCadastroTitle">Cadastrar Veículo</span>
+      <button class="modal-close" onclick="fecharModal('modalCadastro')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="formCadastro" onsubmit="salvarVeiculo(event)">
+        <input type="hidden" id="editId" />
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label class="form-label">Marca *</label>
+            <input class="form-input" type="text" id="fMarca" placeholder="Ex: Toyota" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Modelo *</label>
+            <input class="form-input" type="text" id="fModelo" placeholder="Ex: Corolla Cross XRE" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ano *</label>
+            <input class="form-input" type="number" id="fAno" placeholder="2023" min="1990" max="2100" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cor</label>
+            <input class="form-input" type="text" id="fCor" placeholder="Ex: Prata Metálico" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Placa *</label>
+            <input class="form-input" type="text" id="fPlaca" placeholder="ABC-1D23" required
+              oninput="this.value=this.value.toUpperCase()" maxlength="8" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quilometragem *</label>
+            <input class="form-input" type="text" id="fKm" placeholder="Ex: 45.000 km" required
+              oninput="mascaraKm(this)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nº de Donos</label>
+            <input class="form-input" type="number" id="fDonos" value="1" min="1" max="10" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Combustível</label>
+            <select class="form-input" id="fCombustivel">
+              <option>Flex</option>
+              <option>Gasolina</option>
+              <option>Etanol</option>
+              <option>Diesel</option>
+              <option>Híbrido</option>
+              <option>Elétrico</option>
+              <option>GNV</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Câmbio</label>
+            <select class="form-input" id="fCambio">
+              <option>Manual</option>
+              <option>Automático</option>
+              <option>CVT</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Condição</label>
+            <select class="form-input" id="fCondicao">
+              <option>Ótimo</option>
+              <option>Bom</option>
+              <option>Regular</option>
+              <option>Ruim</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preço de Compra (R$) *</label>
+            <input class="form-input" type="text" id="fPrecoCompra" placeholder="R$ 0,00" required
+              oninput="mascaraDinheiro(this)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preço de Venda (R$) *</label>
+            <input class="form-input" type="text" id="fPrecoVenda" placeholder="R$ 0,00" required
+              oninput="mascaraDinheiro(this)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="fStatus">
+              <option value="disponivel">Disponível</option>
+              <option value="reservado">Reservado</option>
+              <option value="vendido">Vendido</option>
+              <option value="manutencao">Manutenção</option>
+            </select>
+          </div>
+          <div class="form-group form-full">
+            <label class="form-label">Foto de Capa</label>
+            <input class="form-input" type="file" id="fFoto" accept="image/*" onchange="previewFoto(event)" />
+            <div id="fotoPreview" style="margin-top:8px;display:none">
+              <img id="fotoPreviewImg" style="width:100%;max-height:180px;object-fit:cover;border:1px solid var(--border)" />
+            </div>
+          </div>
+          <div class="form-group form-full">
+            <label class="form-label">Observações</label>
+            <textarea class="form-input" id="fObs" rows="3" placeholder="Revisado, multimídia, couro, histórico completo…"></textarea>
+          </div>
+
+        </div>
+
+        <div id="formError"   class="form-error"   style="display:none"></div>
+        <div id="formSuccess" class="form-success" style="display:none"></div>
+
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button type="button" class="btn-secondary" onclick="fecharModal('modalCadastro')">Cancelar</button>
+          <button type="submit" class="btn-primary" id="btnSalvar">Salvar Veículo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
