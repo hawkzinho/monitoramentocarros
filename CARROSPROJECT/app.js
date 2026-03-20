@@ -32,7 +32,7 @@ function renderSidebar() {
   sidebar.innerHTML = `
     <div class="sidebar-logo">
       <div class="logo-icon-wrap">${icon('car-front', 22)}</div>
-      <div class="logo-text">AutoGest</div>
+      <div class="logo-text">AutoGestão</div>
       <div class="logo-sub">Gestão de Veículos</div>
     </div>
     <nav class="sidebar-nav">
