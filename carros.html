@@ -26,6 +26,48 @@
       </div>
     </div>
     <div class="content">
+
+      <!-- Cards de resumo -->
+      <div class="cards-section-label">Estoque atual</div>
+      <div class="cards-grid" style="margin-bottom:10px">
+
+        <div class="card card-metric">
+          <div class="card-icon icon-gray"><i data-lucide="list" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Total de Veículos</div>
+          <div class="card-value" id="cardTotalVeiculos">—</div>
+          <div class="card-sub">todos os cadastrados</div>
+        </div>
+
+        <div class="card card-metric">
+          <div class="card-icon icon-blue"><i data-lucide="car" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Veículos no Estoque</div>
+          <div class="card-value" id="cardEstoque">—</div>
+          <div class="card-sub">ainda não vendidos</div>
+        </div>
+
+        <div class="card card-metric">
+          <div class="card-icon icon-purple"><i data-lucide="wallet" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Valor do Estoque</div>
+          <div class="card-value currency" id="cardValorEstoque">—</div>
+          <div class="card-sub">soma dos valores de compra</div>
+        </div>
+
+        <div class="card card-metric">
+          <div class="card-icon icon-orange"><i data-lucide="wrench" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Despesas do Estoque</div>
+          <div class="card-value currency" id="cardDespEstoque">—</div>
+          <div class="card-sub">total gasto nos carros</div>
+        </div>
+
+        <div class="card card-metric">
+          <div class="card-icon icon-green"><i data-lucide="tag" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Vendidos no Mês</div>
+          <div class="card-value" id="cardVendidosMes">—</div>
+          <div class="card-sub" id="cardVendidosMesSub">mês atual</div>
+        </div>
+
+      </div>
+
       <div class="table-card">
         <div class="table-header">
           <h3>Todos os Carros</h3>

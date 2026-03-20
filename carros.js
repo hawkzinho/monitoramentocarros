@@ -25,10 +25,41 @@ async function loadCarros() {
       _despPorCarro[d.carro_id] = (_despPorCarro[d.carro_id] || 0) + (parseFloat(d.valor) || 0);
     });
     renderTable();
+    renderCarrosCards();
   } catch (err) {
     console.error(err);
     showToast('Erro ao carregar carros', 'error');
   }
+}
+
+function renderCarrosCards() {
+  const now   = new Date();
+  const month = now.getMonth() + 1;
+  const year  = now.getFullYear();
+  const { start, end } = getMonthRange(month, year);
+
+  const emEstoque  = _carros.filter(c => !isCarroVendido(c.status));
+  const vendidosMes = _carros.filter(c =>
+    isCarroVendido(c.status) && c.data_venda >= start && c.data_venda <= end
+  );
+
+  const valorEstoque = emEstoque.reduce((s, c) => s + (parseFloat(c.valor_compra) || 0), 0);
+  const despEstoque  = emEstoque.reduce((s, c) => s + (_despPorCarro[c.id] || 0), 0);
+
+  const monthName = new Date(year, month - 1, 1)
+    .toLocaleDateString('pt-BR', { month: 'long' });
+
+  setText('cardTotalVeiculos', _carros.length);
+  setText('cardEstoque',       emEstoque.length);
+  setText('cardValorEstoque',  formatCurrency(valorEstoque));
+  setText('cardDespEstoque',   formatCurrency(despEstoque));
+  setText('cardVendidosMes',   vendidosMes.length);
+  setText('cardVendidosMesSub', monthName.charAt(0).toUpperCase() + monthName.slice(1));
+}
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
 }
 
 function setTableLoading(tbodyId, cols) {
@@ -90,11 +121,11 @@ function renderTable() {
           ${c.cor ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">${esc(c.cor)}</div>` : ''}
         </td>
         <td>${c.placa ? esc(c.placa) : '—'}</td>
-        <td>${c.ano || '—'}</td>
+        <td class="col-hide-mobile">${c.ano || '—'}</td>
         <td>${statusBadge(c.status)}</td>
         <td class="currency">${formatCurrency(c.valor_compra)}</td>
         <td class="currency">${formatCurrency(c.valor_venda)}</td>
-        <td class="currency">${formatCurrency(desp)}</td>
+        <td class="currency col-hide-mobile">${formatCurrency(desp)}</td>
         <td>${lucroHtml}</td>
         <td>
           <div class="actions">
