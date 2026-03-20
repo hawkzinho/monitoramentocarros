@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoGest - Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <i data-lucide="menu" style="width:18px;height:18px"></i>
+        </button>
+        <span class="topbar-title">Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <div class="month-selector">
+          <select id="monthSelect"></select>
+          <select id="yearSelect"></select>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="cards-grid">
+        <div class="card card-metric">
+          <div class="card-icon icon-blue"><i data-lucide="dollar-sign" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Faturamento</div>
+          <div class="card-value currency" id="cardFaturamento">—</div>
+          <div class="card-sub">valor total de vendas</div>
+        </div>
+        <div class="card card-metric">
+          <div class="card-icon icon-purple"><i data-lucide="car" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Total Investido</div>
+          <div class="card-value currency" id="cardInvestido">—</div>
+          <div class="card-sub">carros em estoque</div>
+        </div>
+        <div class="card card-metric">
+          <div class="card-icon icon-red"><i data-lucide="receipt" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Despesas Totais</div>
+          <div class="card-value currency" id="cardDespesas">—</div>
+          <div class="card-sub">carros + gerais</div>
+        </div>
+        <div class="card card-metric">
+          <div class="card-icon icon-green"><i data-lucide="trending-up" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Lucro Bruto</div>
+          <div class="card-value currency" id="cardLucroBruto">—</div>
+          <div class="card-sub">antes das despesas gerais</div>
+        </div>
+        <div class="card card-metric">
+          <div class="card-icon icon-green"><i data-lucide="check-circle" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Lucro Líquido</div>
+          <div class="card-value currency" id="cardLucroLiquido">—</div>
+          <div class="card-sub">lucro bruto − despesas gerais</div>
+        </div>
+        <div class="card card-metric">
+          <div class="card-icon icon-yellow"><i data-lucide="tag" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Carros Vendidos</div>
+          <div class="card-value" id="cardVendidos">—</div>
+          <div class="card-sub">no mês selecionado</div>
+        </div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>Faturamento mensal</h3>
+          <div class="chart-wrapper"><canvas id="chartFaturamento"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Lucro</h3>
+          <div class="chart-wrapper"><canvas id="chartLucro"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Despesas</h3>
+          <div class="chart-wrapper"><canvas id="chartDespesas"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoGest - Carros</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <i data-lucide="menu" style="width:18px;height:18px"></i>
+        </button>
+        <span class="topbar-title">Carros</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" id="btnAddCarro">
+          <i data-lucide="plus" style="width:14px;height:14px"></i> Adicionar
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Todos os Carros</h3>
+          <div class="table-controls">
+            <div class="search-input">
+              <span class="search-icon"><i data-lucide="search" style="width:13px;height:13px"></i></span>
+              <input class="form-input" id="searchInput" placeholder="Buscar modelo ou placa..." style="width:210px">
+            </div>
+            <select class="form-select" id="filterStatus" style="width:135px">
+              <option value="">Todos</option>
+              <option value="disponivel">Disponível</option>
+              <option value="vendido">Vendido</option>
+              <option value="repasse">Repasse</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th data-sort="modelo">Modelo</th>
+                <th class="col-hide-mobile">Placa</th>
+                <th class="col-hide-mobile">Ano</th>
+                <th data-sort="status">Status</th>
+                <th data-sort="valor_compra">Compra</th>
+                <th class="col-hide-mobile">Venda</th>
+                <th class="col-hide-mobile">Despesas</th>
+                <th>Lucro</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="carrosBody">
+              <tr><td colspan="9"><div class="loading"><div class="spinner"></div> Carregando...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
+<script src="carros.js"></script>
+</body>
+</html>
