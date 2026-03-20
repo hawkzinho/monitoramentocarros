@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatórios — Matheus Veículos</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <i data-lucide="menu" style="width:18px;height:18px"></i>
+        </button>
+        <span class="topbar-title">Relatórios</span>
+      </div>
+      <div class="topbar-right">
+        <div class="month-selector">
+          <select id="monthSelect"></select>
+          <select id="yearSelect"></select>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+
+      <div id="loadingOverlay" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.2);backdrop-filter:blur(2px);align-items:center;justify-content:center">
+        <div style="background:var(--card-bg);border-radius:var(--radius);padding:24px 32px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-md)">
+          <div class="spinner"></div>
+          <span style="font-size:13px;color:var(--text-muted)">Calculando...</span>
+        </div>
+      </div>
+
+      <div class="cards-grid" style="margin-bottom:20px">
+        <div class="card card-metric">
+          <div class="card-icon icon-blue"><i data-lucide="dollar-sign" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Faturamento</div>
+          <div class="card-value currency" id="cardFaturamento">—</div>
+        </div>
+        <div class="card card-metric">
+          <div class="card-icon icon-yellow"><i data-lucide="tag" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Carros Vendidos</div>
+          <div class="card-value" id="cardVendidos">—</div>
+        </div>
+        <div class="card card-metric">
+          <div class="card-icon icon-red"><i data-lucide="receipt" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Despesas Totais</div>
+          <div class="card-value currency" id="cardDespesas">—</div>
+        </div>
+        <div class="card card-metric">
+          <div class="card-icon icon-green"><i data-lucide="trending-up" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Lucro Bruto</div>
+          <div class="card-value currency" id="cardLucroBruto">—</div>
+        </div>
+        <div class="card card-metric">
+          <div class="card-icon icon-green"><i data-lucide="check-circle" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Lucro Líquido</div>
+          <div class="card-value currency" id="cardLucroLiquido">—</div>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom:20px">
+        <h3>Visão Anual</h3>
+        <div class="chart-wrapper" style="height:260px">
+          <canvas id="chartAnual"></canvas>
+        </div>
+      </div>
+
+      <div class="table-card" style="margin-bottom:20px">
+        <div class="table-header">
+          <h3>Carros Vendidos no Período</h3>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Modelo</th>
+                <th class="col-hide-mobile">Status</th>
+                <th>Venda</th>
+                <th class="col-hide-mobile">Compra</th>
+                <th class="col-hide-mobile">Despesas</th>
+                <th>Lucro</th>
+              </tr>
+            </thead>
+            <tbody id="vendidosBody">
+              <tr><td colspan="6"><div class="loading"><div class="spinner"></div> Carregando...</div></td></tr>
+            </tbody>
+            <tfoot id="vendidosFooter"></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Despesas Gerais no Período</h3>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th class="col-hide-mobile">Data</th>
+              </tr>
+            </thead>
+            <tbody id="despGeraisBody">
+              <tr><td colspan="3"><div class="loading"><div class="spinner"></div> Carregando...</div></td></tr>
+            </tbody>
+            <tfoot id="despGeraisFooter"></tfoot>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
+<script src="relatorios.js"></script>
+</body>
+</html>

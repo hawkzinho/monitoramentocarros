@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Matheus Veículos</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <i data-lucide="menu" style="width:18px;height:18px"></i>
+        </button>
+        <span class="topbar-title">Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <div class="month-selector">
+          <select id="monthSelect"></select>
+          <select id="yearSelect"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Seção: Resultado do mês -->
+      <div class="cards-section-label">Resultado do mês</div>
+      <div class="cards-grid" style="margin-bottom:10px">
+
+        <div class="card card-metric">
+          <div class="card-icon icon-blue"><i data-lucide="dollar-sign" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Faturamento</div>
+          <div class="card-value currency" id="cardFaturamento">—</div>
+          <div class="card-sub">vendas no período</div>
+        </div>
+
+        <div class="card card-metric">
+          <div class="card-icon icon-red"><i data-lucide="receipt" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Despesas Gerais</div>
+          <div class="card-value currency" id="cardDespesas">—</div>
+          <div class="card-sub">despesas do período</div>
+        </div>
+
+        <div class="card card-metric">
+          <div class="card-icon icon-green"><i data-lucide="trending-up" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Lucro Bruto</div>
+          <div class="card-value currency" id="cardLucroBruto">—</div>
+          <div class="card-sub">antes das despesas gerais</div>
+        </div>
+
+        <div class="card card-metric">
+          <div class="card-icon icon-green"><i data-lucide="check-circle" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Lucro Líquido</div>
+          <div class="card-value currency" id="cardLucroLiquido">—</div>
+          <div class="card-sub">lucro bruto − despesas gerais</div>
+        </div>
+
+        <div class="card card-metric">
+          <div class="card-icon icon-purple"><i data-lucide="percent" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Margem de Lucro</div>
+          <div class="card-value" id="cardPctLucro">—</div>
+          <div class="card-sub">lucro líquido / faturamento</div>
+        </div>
+
+        <div class="card card-metric">
+          <div class="card-icon icon-yellow"><i data-lucide="tag" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Carros Vendidos</div>
+          <div class="card-value" id="cardVendidos">—</div>
+          <div class="card-sub">no período selecionado</div>
+        </div>
+
+      </div>
+
+      <!-- Seção: Estoque atual -->
+      <div class="cards-section-label" style="margin-top:8px">Estoque atual</div>
+      <div class="cards-grid" style="margin-bottom:24px">
+
+        <div class="card card-metric">
+          <div class="card-icon icon-gray"><i data-lucide="list" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Total de Veículos</div>
+          <div class="card-value" id="cardTotalVeiculos">—</div>
+          <div class="card-sub">todos os cadastrados</div>
+        </div>
+
+        <div class="card card-metric">
+          <div class="card-icon icon-blue"><i data-lucide="car" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Veículos no Estoque</div>
+          <div class="card-value" id="cardEstoque">—</div>
+          <div class="card-sub">ainda não vendidos</div>
+        </div>
+
+        <div class="card card-metric">
+          <div class="card-icon icon-purple"><i data-lucide="wallet" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Valor do Estoque</div>
+          <div class="card-value currency" id="cardValorEstoque">—</div>
+          <div class="card-sub">soma dos valores de compra</div>
+        </div>
+
+        <div class="card card-metric">
+          <div class="card-icon icon-orange"><i data-lucide="wrench" style="width:22px;height:22px"></i></div>
+          <div class="card-label">Despesas do Estoque</div>
+          <div class="card-value currency" id="cardDespEstoque">—</div>
+          <div class="card-sub">total gasto nos carros</div>
+        </div>
+
+      </div>
+
+      <!-- Gráficos -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>Faturamento mensal</h3>
+          <div class="chart-wrapper"><canvas id="chartFaturamento"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Lucro</h3>
+          <div class="chart-wrapper"><canvas id="chartLucro"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Despesas Gerais</h3>
+          <div class="chart-wrapper"><canvas id="chartDespesas"></canvas></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>
