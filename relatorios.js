@@ -113,8 +113,8 @@ function renderVendidosTable(vendidos, despPorCarro) {
         <td><strong>${esc(c.modelo)}</strong></td>
         <td>${statusBadge(c.status)}</td>
         <td class="currency">${formatCurrency(venda)}</td>
-        <td class="currency">${formatCurrency(compra)}</td>
-        <td class="currency">${formatCurrency(desp)}</td>
+        <td class="currency col-hide-mobile">${formatCurrency(compra)}</td>
+        <td class="currency col-hide-mobile">${formatCurrency(desp)}</td>
         <td class="currency ${lucro >= 0 ? 'profit-positive' : 'profit-negative'}">${formatCurrency(lucro)}</td>
       </tr>`;
   }).join('');
@@ -123,8 +123,8 @@ function renderVendidosTable(vendidos, despPorCarro) {
     <tr>
       <td colspan="2" style="font-weight:600">Total</td>
       <td class="currency">${formatCurrency(totVenda)}</td>
-      <td class="currency">${formatCurrency(totCompra)}</td>
-      <td class="currency">${formatCurrency(totDesp)}</td>
+      <td class="currency col-hide-mobile">${formatCurrency(totCompra)}</td>
+      <td class="currency col-hide-mobile">${formatCurrency(totDesp)}</td>
       <td class="currency ${totLucro >= 0 ? 'profit-positive' : 'profit-negative'}">${formatCurrency(totLucro)}</td>
     </tr>`;
 }
@@ -190,12 +190,29 @@ async function loadAnualChart(year) {
       const vendidos = carros.filter(c =>
         isCarroVendido(c.status) && c.data_venda >= start && c.data_venda <= end
       );
-      dataFat.push(  vendidos.reduce((s,c) => s+(parseFloat(c.valor_venda)||0),0));
-      dataLucro.push(vendidos.reduce((s,c) => s+(parseFloat(c.valor_venda)||0)-(parseFloat(c.valor_compra)||0)-(despPorCarro[c.id]||0),0));
-      const dg = despGerais.filter(d => d.data >= start && d.data <= end).reduce((s,d)=>s+(parseFloat(d.valor)||0),0);
-      const dc = vendidos.reduce((s,c)=>s+(despPorCarro[c.id]||0),0);
+      const fat   = vendidos.reduce((s,c) => s+(parseFloat(c.valor_venda)||0),0);
+      const lucro = vendidos.reduce((s,c) => s+(parseFloat(c.valor_venda)||0)-(parseFloat(c.valor_compra)||0)-(despPorCarro[c.id]||0),0);
+      const dg    = despGerais.filter(d => d.data >= start && d.data <= end).reduce((s,d)=>s+(parseFloat(d.valor)||0),0);
+      const dc    = vendidos.reduce((s,c)=>s+(despPorCarro[c.id]||0),0);
+      dataFat.push(fat);
+      dataLucro.push(lucro);
       dataDesp.push(dc+dg);
     });
+
+    // ── Totais anuais ──
+    const totalFat  = dataFat.reduce((s,v)=>s+v,0);
+    const totalLucro = dataLucro.reduce((s,v)=>s+v,0);
+    const totalDesp  = dataDesp.reduce((s,v)=>s+v,0);
+
+    const elFat  = document.getElementById('anualFaturamento');
+    const elLucro = document.getElementById('anualLucro');
+    const elDesp  = document.getElementById('anualDespesas');
+    if (elFat)  elFat.textContent  = formatCurrency(totalFat);
+    if (elLucro) {
+      elLucro.textContent = formatCurrency(totalLucro);
+      elLucro.className = 'chart-total-value ' + (totalLucro >= 0 ? 'profit-positive' : 'profit-negative');
+    }
+    if (elDesp)  elDesp.textContent  = formatCurrency(totalDesp);
 
     const labels    = months.map(m => m.label);
     const isDark    = document.documentElement.getAttribute('data-theme') === 'dark';

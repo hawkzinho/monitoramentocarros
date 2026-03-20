@@ -64,7 +64,25 @@
       </div>
 
       <div class="chart-card" style="margin-bottom:20px">
-        <h3>Visão Anual</h3>
+        <div class="chart-card-header">
+          <h3>Visão Anual</h3>
+          <div class="chart-anual-totals">
+            <div class="chart-total-item">
+              <span class="chart-total-label">Faturamento</span>
+              <span class="chart-total-value" id="anualFaturamento">—</span>
+            </div>
+            <div class="chart-total-divider"></div>
+            <div class="chart-total-item">
+              <span class="chart-total-label">Lucro</span>
+              <span class="chart-total-value profit-positive" id="anualLucro">—</span>
+            </div>
+            <div class="chart-total-divider"></div>
+            <div class="chart-total-item">
+              <span class="chart-total-label">Despesas Brutas</span>
+              <span class="chart-total-value profit-negative" id="anualDespesas">—</span>
+            </div>
+          </div>
+        </div>
         <div class="chart-wrapper" style="height:260px">
           <canvas id="chartAnual"></canvas>
         </div>
