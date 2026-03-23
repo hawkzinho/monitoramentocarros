@@ -111,6 +111,7 @@ function renderVendidosTable(vendidos, despPorCarro) {
     return `
       <tr>
         <td><strong>${esc(c.modelo)}</strong></td>
+        <td class="col-hide-mobile">${(c.tipo||'carro')==='moto'?'🏍️ Moto':'🚗 Carro'}</td>
         <td>${statusBadge(c.status)}</td>
         <td class="currency">${formatCurrency(venda)}</td>
         <td class="currency col-hide-mobile">${formatCurrency(compra)}</td>
@@ -121,7 +122,7 @@ function renderVendidosTable(vendidos, despPorCarro) {
 
   tfoot.innerHTML = `
     <tr>
-      <td colspan="2" style="font-weight:600">Total</td>
+      <td colspan="3" style="font-weight:600">Total</td>
       <td class="currency">${formatCurrency(totVenda)}</td>
       <td class="currency col-hide-mobile">${formatCurrency(totCompra)}</td>
       <td class="currency col-hide-mobile">${formatCurrency(totDesp)}</td>

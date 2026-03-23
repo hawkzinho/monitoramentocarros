@@ -16,6 +16,17 @@ async function loadDetalhes() {
     _carro = r1.data; _despesas = r2.data || [];
     document.title = `AutoGest - ${_carro.modelo}`;
     document.getElementById('pageTitle').textContent = _carro.modelo;
+
+    // Checklist button
+    const clRes = await db.from('checklist').select('id').eq('carro_id', _carroId).maybeSingle();
+    const hasChecklist = !!clRes.data;
+    const btnCl = document.getElementById('btnChecklist');
+    if (btnCl) {
+      btnCl.href = `checklist.html?id=${_carroId}`;
+      btnCl.className = `btn btn-sm ${hasChecklist ? 'btn-icon-checklist-done' : 'btn-secondary'}`;
+      btnCl.innerHTML = `<i data-lucide="${hasChecklist ? 'clipboard-check' : 'clipboard-list'}" style="width:14px;height:14px"></i> ${hasChecklist ? 'Ver checklist' : 'Fazer checklist'}`;
+      safeIcons(btnCl.parentElement);
+    }
     renderCarroInfo(); renderDespesasTable();
   } catch (err) {
     console.error(err);
@@ -77,6 +88,7 @@ function renderCarroInfo() {
 
   document.getElementById('carroInfo').innerHTML = `
     <div class="detail-grid">
+      <div class="detail-item"><div class="detail-label">Tipo</div><div class="detail-value">${(_carro.tipo||'carro') === 'moto' ? '🏍️ Moto' : '🚗 Carro'}</div></div>
       <div class="detail-item"><div class="detail-label">Modelo</div><div class="detail-value">${esc(_carro.modelo)}</div></div>
       <div class="detail-item"><div class="detail-label">Placa</div><div class="detail-value">${esc(_carro.placa)||'—'}</div></div>
       <div class="detail-item"><div class="detail-label">Cor</div><div class="detail-value">${esc(_carro.cor)||'—'}</div></div>

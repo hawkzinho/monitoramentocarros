@@ -63,15 +63,19 @@ async function loadDashboard() {
     // % de lucro líquido sobre faturamento
     const pctLucro = faturamento > 0 ? (lucroLiquido / faturamento) * 100 : null;
 
-    // ── Informações do estoque (geral, não filtrado por mês) ──
-    const totalVeiculos  = carros.length;
-    const qtdEstoque     = emEstoque.length;
-    const valorEstoque   = emEstoque.reduce((s, c) => s + (parseFloat(c.valor_compra) || 0), 0);
-    const despEstoque    = emEstoque.reduce((s, c) => s + (despPorCarro[c.id] || 0), 0);
+    // ── Informações do estoque ──
+    const totalVeiculos   = carros.length;
+    const totalCarros     = carros.filter(c => (c.tipo||'carro') === 'carro').length;
+    const totalMotos      = carros.filter(c => c.tipo === 'moto').length;
+    const qtdEstoque      = emEstoque.length;
+    const carrosEstoque   = emEstoque.filter(c => (c.tipo||'carro') === 'carro').length;
+    const motosEstoque    = emEstoque.filter(c => c.tipo === 'moto').length;
+    const valorEstoque    = emEstoque.reduce((s, c) => s + (parseFloat(c.valor_compra) || 0), 0);
+    const despEstoque     = emEstoque.reduce((s, c) => s + (despPorCarro[c.id] || 0), 0);
 
     // ── Atualiza cards do mês ──
     setText('cardFaturamento', formatCurrency(faturamento));
-    setText('cardDespesas',    formatCurrency(totalDespGerais)); // só despesas gerais
+    setText('cardDespesas',    formatCurrency(totalDespGerais));
     setText('cardVendidos',    vendidosMes.length);
 
     setValCard('cardLucroBruto',   lucroBruto);
@@ -79,20 +83,22 @@ async function loadDashboard() {
 
     const pctEl = document.getElementById('cardPctLucro');
     if (pctEl) {
-      if (pctLucro === null) {
-        pctEl.textContent = '—';
-        pctEl.className = 'card-value';
-      } else {
+      if (pctLucro === null) { pctEl.textContent = '—'; pctEl.className = 'card-value'; }
+      else {
         pctEl.textContent = pctLucro.toFixed(1) + '%';
         pctEl.className = 'card-value ' + (pctLucro >= 0 ? 'profit-positive' : 'profit-negative');
       }
     }
 
     // ── Atualiza cards de estoque ──
-    setText('cardTotalVeiculos', totalVeiculos);
-    setText('cardEstoque',       qtdEstoque);
-    setText('cardValorEstoque',  formatCurrency(valorEstoque));
-    setText('cardDespEstoque',   formatCurrency(despEstoque));
+    setText('cardTotalVeiculos',  totalVeiculos);
+    setText('cardTotalCarros',    totalCarros);
+    setText('cardTotalMotos',     totalMotos);
+    setText('cardEstoque',        qtdEstoque);
+    setText('cardCarrosEstoque',  carrosEstoque);
+    setText('cardMotosEstoque',   motosEstoque);
+    setText('cardValorEstoque',   formatCurrency(valorEstoque));
+    setText('cardDespEstoque',    formatCurrency(despEstoque));
 
   } catch (err) {
     console.error('Dashboard error:', err);

@@ -20,6 +20,7 @@ const NAV_ITEMS = [
   { href: 'carros.html',     lucide: 'car',              label: 'Carros',     match: ['carros.html', 'carro-detalhes.html'] },
   { href: 'despesas.html',   lucide: 'receipt',          label: 'Despesas',   match: ['despesas.html'] },
   { href: 'relatorios.html', lucide: 'bar-chart-2',      label: 'Relatórios', match: ['relatorios.html'] },
+  { href: 'checklist.html',  lucide: 'clipboard-list',  label: 'Checklist',  match: ['checklist.html'] },
 ];
 
 function renderSidebar() {

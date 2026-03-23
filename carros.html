@@ -17,7 +17,7 @@
         <button class="hamburger" id="hamburger" aria-label="Menu">
           <i data-lucide="menu" style="width:18px;height:18px"></i>
         </button>
-        <span class="topbar-title">Carros</span>
+        <span class="topbar-title">Veículos</span>
       </div>
       <div class="topbar-right">
         <button class="btn btn-primary btn-sm" id="btnAddCarro">
@@ -25,24 +25,31 @@
         </button>
       </div>
     </div>
+
     <div class="content">
 
-      <!-- Cards de resumo -->
+      <!-- Cards resumo -->
       <div class="cards-section-label">Estoque atual</div>
-      <div class="cards-grid" style="margin-bottom:10px">
+      <div class="cards-grid" style="margin-bottom:24px">
 
         <div class="card card-metric">
           <div class="card-icon icon-gray"><i data-lucide="list" style="width:22px;height:22px"></i></div>
           <div class="card-label">Total de Veículos</div>
           <div class="card-value" id="cardTotalVeiculos">—</div>
-          <div class="card-sub">todos os cadastrados</div>
+          <div style="display:flex;gap:8px;margin-top:5px">
+            <span style="font-size:11px;color:var(--info)"><i data-lucide="car" style="width:11px;height:11px"></i> <span id="cardTotalCarros">—</span> carros</span>
+            <span style="font-size:11px;color:var(--warning)"><i data-lucide="bike" style="width:11px;height:11px"></i> <span id="cardTotalMotos">—</span> motos</span>
+          </div>
         </div>
 
         <div class="card card-metric">
-          <div class="card-icon icon-blue"><i data-lucide="car" style="width:22px;height:22px"></i></div>
-          <div class="card-label">Veículos no Estoque</div>
+          <div class="card-icon icon-blue"><i data-lucide="package" style="width:22px;height:22px"></i></div>
+          <div class="card-label">No Estoque</div>
           <div class="card-value" id="cardEstoque">—</div>
-          <div class="card-sub">ainda não vendidos</div>
+          <div style="display:flex;gap:8px;margin-top:5px">
+            <span style="font-size:11px;color:var(--info)"><i data-lucide="car" style="width:11px;height:11px"></i> <span id="cardCarrosEstoque">—</span></span>
+            <span style="font-size:11px;color:var(--warning)"><i data-lucide="bike" style="width:11px;height:11px"></i> <span id="cardMotosEstoque">—</span></span>
+          </div>
         </div>
 
         <div class="card card-metric">
@@ -56,7 +63,7 @@
           <div class="card-icon icon-orange"><i data-lucide="wrench" style="width:22px;height:22px"></i></div>
           <div class="card-label">Despesas do Estoque</div>
           <div class="card-value currency" id="cardDespEstoque">—</div>
-          <div class="card-sub">total gasto nos carros</div>
+          <div class="card-sub">total gasto nos veículos</div>
         </div>
 
         <div class="card card-metric">
@@ -68,16 +75,22 @@
 
       </div>
 
+      <!-- Tabela -->
       <div class="table-card">
         <div class="table-header">
-          <h3>Todos os Carros</h3>
+          <h3>Todos os Veículos</h3>
           <div class="table-controls">
             <div class="search-input">
               <span class="search-icon"><i data-lucide="search" style="width:13px;height:13px"></i></span>
-              <input class="form-input" id="searchInput" placeholder="Buscar modelo ou placa..." style="width:210px">
+              <input class="form-input" id="searchInput" placeholder="Buscar modelo ou placa..." style="width:200px">
             </div>
-            <select class="form-select" id="filterStatus" style="width:135px">
+            <select class="form-select" id="filterTipo" style="width:110px">
               <option value="">Todos</option>
+              <option value="carro">Carros</option>
+              <option value="moto">Motos</option>
+            </select>
+            <select class="form-select" id="filterStatus" style="width:130px">
+              <option value="">Todos status</option>
               <option value="disponivel">Disponível</option>
               <option value="vendido">Vendido</option>
               <option value="repasse">Repasse</option>
@@ -89,18 +102,19 @@
             <thead>
               <tr>
                 <th data-sort="modelo">Modelo</th>
-                <th class="col-hide-mobile">Placa</th>
-                <th class="col-hide-mobile">Ano</th>
+                <th class="col-tipo">Tipo</th>
+                <th class="col-placa">Placa</th>
+                <th class="col-ano">Ano</th>
                 <th data-sort="status">Status</th>
-                <th data-sort="valor_compra">Compra</th>
-                <th class="col-hide-mobile">Venda</th>
-                <th class="col-hide-mobile">Despesas</th>
+                <th data-sort="valor_compra" class="col-compra">Compra</th>
+                <th class="col-venda">Venda</th>
+                <th class="col-despesas">Despesas</th>
                 <th>Lucro</th>
                 <th>Ações</th>
               </tr>
             </thead>
             <tbody id="carrosBody">
-              <tr><td colspan="9"><div class="loading"><div class="spinner"></div> Carregando...</div></td></tr>
+              <tr><td colspan="10"><div class="loading"><div class="spinner"></div> Carregando...</div></td></tr>
             </tbody>
           </table>
         </div>

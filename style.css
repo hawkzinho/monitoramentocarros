@@ -365,7 +365,29 @@ input:checked + .switch-slider::before { transform: translateX(18px); background
 
 .table-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
-.table-responsive { overflow-x: auto; }
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Scroll sempre visível na borda da div, não no fim da página */
+  scrollbar-width: thin;
+  scrollbar-color: var(--card-border) transparent;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
+}
+.table-responsive::-webkit-scrollbar-track {
+  background: transparent;
+}
+.table-responsive::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 3px;
+}
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: var(--text-light);
+}
+
+table { min-width: unset; width: 100%; }
 
 table { width: 100%; border-collapse: collapse; }
 
@@ -1222,3 +1244,152 @@ tfoot td { padding: 11px 16px; font-size: 13.5px; font-weight: 600; color: var(-
   }
   .chart-total-item { align-items: center; }
 }
+
+/* ── Tabela de veículos: oculta colunas progressivamente ── */
+@media (max-width: 1200px) {
+  .col-despesas { display: none; }
+}
+@media (max-width: 1050px) {
+  .col-ano     { display: none; }
+  .col-venda   { display: none; }
+}
+@media (max-width: 860px) {
+  .col-placa   { display: none; }
+  .col-tipo    { display: none; }
+}
+@media (max-width: 640px) {
+  .col-compra  { display: none; }
+}
+
+/* ══════════════════════════════════════
+   CHECKLIST
+══════════════════════════════════════ */
+
+/* Header do veículo */
+.checklist-vehicle-header {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow);
+  flex-wrap: wrap;
+}
+
+/* Intro banner */
+.checklist-intro {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--info-light);
+  color: var(--info);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 18px;
+}
+
+/* Grid 2x2 */
+.checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* Card de cada vista */
+.checklist-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.checklist-card-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 16px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--card-border);
+}
+
+/* Imagem */
+.checklist-img-wrap {
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--card-border);
+  min-height: 180px;
+}
+
+.checklist-car-img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
+}
+
+.flip-h { transform: scaleX(-1); }
+
+/* Textarea */
+.checklist-obs-wrap { padding: 12px 14px; }
+
+.checklist-textarea {
+  min-height: 80px;
+  resize: vertical;
+  font-size: 13px;
+}
+
+.checklist-textarea[readonly] {
+  background: var(--bg);
+  cursor: default;
+  color: var(--text);
+  border-color: transparent;
+}
+
+.checklist-textarea[readonly]:focus {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* "Sem avarias" badge */
+.checklist-no-obs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: var(--accent-light);
+  border-radius: var(--radius-sm);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .checklist-grid { grid-template-columns: 1fr; }
+  .checklist-vehicle-header { flex-direction: column; align-items: flex-start; }
+}
+
+/* ── Checklist action buttons ── */
+.btn-icon-checklist      { color: var(--text-muted); }
+.btn-icon-checklist:hover { background: var(--info-light) !important; color: var(--info) !important; }
+
+.btn-icon-checklist-done      { color: var(--accent); }
+.btn-icon-checklist-done:hover { background: var(--accent-light) !important; color: var(--accent) !important; }
