@@ -16,18 +16,30 @@ function safeIcons(scope) {
 
 // ── Sidebar ──
 const NAV_ITEMS = [
-  { href: 'index.html',      lucide: 'layout-dashboard', label: 'Dashboard',  match: ['index.html', '/', ''] },
-  { href: 'carros.html',     lucide: 'car',              label: 'Carros',     match: ['carros.html', 'carro-detalhes.html'] },
-  { href: 'despesas.html',   lucide: 'receipt',          label: 'Despesas',   match: ['despesas.html'] },
-  { href: 'relatorios.html', lucide: 'bar-chart-2',      label: 'Relatórios', match: ['relatorios.html'] },
-  { href: 'checklist.html',  lucide: 'clipboard-list',  label: 'Checklist',  match: ['checklist.html'] },
+  { href: 'index.html',      lucide: 'layout-dashboard', label: 'Dashboard',  match: ['index', ''] },
+  { href: 'carros.html',     lucide: 'car',              label: 'Carros',     match: ['carros', 'carro-detalhes'] },
+  { href: 'despesas.html',   lucide: 'receipt',          label: 'Despesas',   match: ['despesas'] },
+  { href: 'relatorios.html', lucide: 'bar-chart-2',      label: 'Relatórios', match: ['relatorios'] },
+  { href: 'checklist.html',  lucide: 'clipboard-list',   label: 'Checklist',  match: ['checklist'] },
 ];
+
+function getCurrentPage() {
+  let path = window.location.pathname || '';
+  path = path.replace(/\/+$/, '');
+
+  let page = path.split('/').pop() || 'index';
+  page = page.toLowerCase();
+
+  if (!page || page === '/') return 'index';
+
+  return page.replace('.html', '');
+}
 
 function renderSidebar() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
 
-  const page   = window.location.pathname.split('/').pop() || 'index.html';
+  const page   = getCurrentPage();
   const isDark = localStorage.getItem('theme') === 'dark';
 
   sidebar.innerHTML = `
@@ -37,7 +49,7 @@ function renderSidebar() {
     <nav class="sidebar-nav">
       <div class="sidebar-label">Menu Principal</div>
       ${NAV_ITEMS.map(item => {
-        const active = item.match.includes(page);
+        const active = item.match.some(route => route === page);
         return `
           <a href="${item.href}" class="nav-item ${active ? 'active' : ''}">
             <span class="nav-icon">${icon(item.lucide, 16)}</span>
@@ -274,7 +286,7 @@ function applyMoneyMask(input) {
     if (e.key >= '0' && e.key <= '9') {
       e.preventDefault();
       const newCents = parseInt(String(cents) + e.key);
-      if (newCents > 999999999) return; // ~9.9 milhões
+      if (newCents > 999999999) return;
       cents = newCents;
       updateDisplay();
     } else if (e.key === 'Backspace') {
@@ -288,7 +300,7 @@ function applyMoneyMask(input) {
     } else if (['Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
       // deixa passar
     } else {
-      e.preventDefault(); // bloqueia letras, pontos, vírgulas etc
+      e.preventDefault();
     }
   });
 
@@ -298,12 +310,10 @@ function applyMoneyMask(input) {
     const digits = pasted.replace(/\D/g, '');
     if (!digits) return;
     const parsed = Math.min(parseInt(digits), 999999999);
-    // trata como se fossem centavos colados
     cents = parsed;
     updateDisplay();
   });
 
-  // impede click de posicionar cursor
   input.addEventListener('click', () => {
     setTimeout(() => {
       try { input.setSelectionRange(input.value.length, input.value.length); } catch(_) {}
@@ -328,7 +338,6 @@ function setMoneyValue(inputOrId, value) {
   if (!input) return;
   const num = parseFloat(value) || 0;
   input.dataset.initValue = num;
-  // Se a máscara já foi aplicada, atualiza cents direto
   if (input.dataset.moneyMaskApplied) {
     input.dataset.cents = Math.round(num * 100);
     const cents    = parseInt(input.dataset.cents);
@@ -357,15 +366,12 @@ initTheme();
 document.addEventListener('DOMContentLoaded', () => {
   renderSidebar();
 
-  // Overlay de modal
   const overlay = document.getElementById('modalOverlay');
   if (overlay) overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(null); });
 
-  // Sidebar overlay (mobile)
   const sidebarOverlay = document.getElementById('sidebarOverlay');
   if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
-  // Hamburger button
   const hamburger = document.getElementById('hamburger');
   if (hamburger) hamburger.addEventListener('click', toggleSidebar);
 
