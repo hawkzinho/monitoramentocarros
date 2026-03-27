@@ -2,6 +2,25 @@
 // carros.js - Gestão de Carros + Motos
 // =============================================
 
+const FLAGS_CONFIG = [
+  { key: 'nota_entrada',       label: 'Nota de entrada' },
+  { key: 'vistoria_entrada',   label: 'Vistoria de entrada' },
+  { key: 'atpv_reconhecida',   label: 'ATPV reconhecida' },
+  { key: 'renave',             label: 'Renave' },
+  { key: 'envio_despachante',  label: 'Envio para o despachante' },
+  { key: 'pagamento_taxa',     label: 'Pagamento da taxa' },
+];
+
+function getFlags(c) {
+  if (!c?.flags) return {};
+  if (typeof c.flags === 'string') { try { return JSON.parse(c.flags); } catch { return {}; } }
+  return c.flags || {};
+}
+
+function allFlagsDone(flags) {
+  return FLAGS_CONFIG.every(f => flags[f.key]);
+}
+
 let _carros       = [];
 let _despPorCarro = {};
 let _sortField    = 'created_at';
@@ -10,7 +29,6 @@ let _searchQuery  = '';
 let _filterStatus = '';
 let _filterTipo   = '';
 let _formDespesas = [];
-
 let _checklistIds = new Set();
 
 async function loadCarros() {
@@ -97,7 +115,11 @@ function renderTable() {
     const lucroHtml = lucro === null
       ? '<span class="profit-na">—</span>'
       : `<span class="currency ${lucro >= 0 ? 'profit-positive' : 'profit-negative'}">${formatCurrency(lucro)}</span>`;
-    const tipo = c.tipo || 'carro';
+    const tipo  = c.tipo || 'carro';
+    const flags = getFlags(c);
+    const done  = allFlagsDone(flags);
+    const transferidoBadge = (isCarroVendido(c.status) && done)
+      ? `<span class="badge-transferido">TRANSFERIDO</span>` : '';
     return `
       <tr>
         <td>
@@ -105,6 +127,7 @@ function renderTable() {
             <span class="vehicle-type-icon">${tipoIcon(tipo)}</span>
             <div class="vehicle-text">
               <strong>${esc(c.modelo)}</strong>
+              ${transferidoBadge}
               ${c.cor ? `<div style="font-size:11px;color:var(--text-muted);margin-top:1px">${esc(c.cor)}</div>` : ''}
             </div>
           </div>
@@ -141,18 +164,15 @@ function renderCarrosCards() {
   const month = now.getMonth() + 1;
   const year  = now.getFullYear();
   const { start, end } = getMonthRange(month, year);
-
-  const emEstoque   = _carros.filter(c => !isCarroVendido(c.status));
+  const emEstoque     = _carros.filter(c => !isCarroVendido(c.status));
   const carrosEstoque = emEstoque.filter(c => (c.tipo || 'carro') === 'carro');
   const motosEstoque  = emEstoque.filter(c => c.tipo === 'moto');
   const vendidosMes   = _carros.filter(c =>
     isCarroVendido(c.status) && c.data_venda >= start && c.data_venda <= end
   );
-
   const valorEstoque = emEstoque.reduce((s, c) => s + (parseFloat(c.valor_compra) || 0), 0);
   const despEstoque  = emEstoque.reduce((s, c) => s + (_despPorCarro[c.id] || 0), 0);
   const monthName    = new Date(year, month - 1, 1).toLocaleDateString('pt-BR', { month: 'long' });
-
   setText('cardTotalVeiculos',  _carros.length);
   setText('cardTotalCarros',    _carros.filter(c => (c.tipo||'carro') === 'carro').length);
   setText('cardTotalMotos',     _carros.filter(c => c.tipo === 'moto').length);
@@ -174,6 +194,28 @@ function esc(str) {
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── FLAGS HTML ──
+function flagsFormHtml(flags = {}) {
+  return `
+    <div class="form-section-divider"><span>Flags de Transferência</span></div>
+    <div class="flags-grid">
+      ${FLAGS_CONFIG.map(f => `
+        <label class="flag-item">
+          <input type="checkbox" class="flag-checkbox" id="flag_${f.key}" ${flags[f.key] ? 'checked' : ''}>
+          <span class="flag-label">${f.label}</span>
+        </label>`).join('')}
+    </div>`;
+}
+
+function readFlags() {
+  const flags = {};
+  FLAGS_CONFIG.forEach(f => {
+    const el = document.getElementById(`flag_${f.key}`);
+    if (el) flags[f.key] = el.checked;
+  });
+  return flags;
+}
+
 // ── Formulário ──
 function tipoOptions(selected = 'carro') {
   return `
@@ -183,14 +225,13 @@ function tipoOptions(selected = 'carro') {
 
 function carroFormHtml(c = null) {
   const needsDate = isCarroVendido(c?.status);
-  const tipo = c?.tipo || 'carro';
+  const tipo  = c?.tipo  || 'carro';
+  const flags = getFlags(c);
   return `
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Tipo *</label>
-        <select class="form-select" id="fTipo">
-          ${tipoOptions(tipo)}
-        </select>
+        <select class="form-select" id="fTipo">${tipoOptions(tipo)}</select>
       </div>
       <div class="form-group">
         <label class="form-label">Status</label>
@@ -249,6 +290,7 @@ function carroFormHtml(c = null) {
       <label class="form-label">Observações</label>
       <textarea class="form-textarea" id="fObs">${esc(c?.observacoes || '')}</textarea>
     </div>
+    ${flagsFormHtml(flags)}
     <div class="form-section-divider"><span>Despesas do Veículo</span></div>
     <div id="formDespesasList"></div>
     <button type="button" class="btn-add-despesa" onclick="addFormDespesa()">
@@ -269,8 +311,8 @@ function statusOptions(selected) {
 }
 
 // ── Despesas inline ──
-function addFormDespesa(desc = '', val = 0) {
-  _formDespesas.push({ descricao: desc, valor: val });
+function addFormDespesa(desc = '', val = 0, data = '') {
+  _formDespesas.push({ descricao: desc, valor: val, data });
   renderFormDespesas();
 }
 
@@ -283,14 +325,17 @@ function renderFormDespesas() {
   const container = document.getElementById('formDespesasList');
   if (!container) return;
   if (!_formDespesas.length) { container.innerHTML = ''; return; }
+  const today = new Date().toISOString().split('T')[0];
   container.innerHTML = _formDespesas.map((d, i) => `
     <div class="despesa-row" id="despRow${i}">
       <input class="form-input" id="dDesc${i}" placeholder="Descrição (ex: pintura, revisão...)"
         value="${esc(d.descricao)}" oninput="_formDespesas[${i}].descricao=this.value" style="flex:1">
-      <div style="position:relative;width:150px;flex-shrink:0">
+      <div style="position:relative;width:140px;flex-shrink:0">
         <span class="input-prefix">R$</span>
         <input class="form-input money-input" id="dValor${i}" placeholder="0,00" style="padding-left:34px">
       </div>
+      <input class="form-input" type="date" id="dData${i}" value="${d.data || today}"
+        oninput="_formDespesas[${i}].data=this.value" style="width:140px;flex-shrink:0">
       <button type="button" class="btn btn-icon btn-xs btn-icon-danger" onclick="removeFormDespesa(${i})">
         <i data-lucide="x" style="width:12px;height:12px"></i>
       </button>
@@ -302,8 +347,13 @@ function renderFormDespesas() {
 
 function readFormDespesas() {
   return _formDespesas.map((d, i) => {
-    const valInput = document.getElementById(`dValor${i}`);
-    return { descricao: d.descricao, valor: valInput ? getMoneyValue(valInput) : (parseFloat(d.valor)||0) };
+    const valInput  = document.getElementById(`dValor${i}`);
+    const dataInput = document.getElementById(`dData${i}`);
+    return {
+      descricao: d.descricao,
+      valor: valInput ? getMoneyValue(valInput) : (parseFloat(d.valor)||0),
+      data:  dataInput?.value || null,
+    };
   }).filter(d => d.descricao?.trim() && d.valor > 0);
 }
 
@@ -311,7 +361,7 @@ function readFormDespesas() {
 function openAddCarro() {
   _formDespesas = [];
   showFormModal('Adicionar Veículo', carroFormHtml(null), {
-    confirmText: 'Adicionar', onConfirm: () => saveCarro(null), width: '620px',
+    confirmText: 'Adicionar', onConfirm: () => saveCarro(null), width: '640px',
   });
   renderFormDespesas();
 }
@@ -322,10 +372,10 @@ async function openEditCarro(id) {
   _formDespesas = [];
   try {
     const { data } = await db.from('despesas_carros').select('*').eq('carro_id', id);
-    _formDespesas = (data || []).map(d => ({ id: d.id, descricao: d.descricao, valor: parseFloat(d.valor)||0 }));
+    _formDespesas = (data || []).map(d => ({ id: d.id, descricao: d.descricao, valor: parseFloat(d.valor)||0, data: d.data || '' }));
   } catch(e) {}
   showFormModal('Editar Veículo', carroFormHtml(carro), {
-    confirmText: 'Salvar', onConfirm: () => saveCarro(id), width: '620px',
+    confirmText: 'Salvar', onConfirm: () => saveCarro(id), width: '640px',
   });
   setMoneyValue('fValorCompra', carro.valor_compra || 0);
   setMoneyValue('fValorVenda',  carro.valor_venda  || 0);
@@ -336,19 +386,22 @@ async function saveCarro(id) {
   const modelo = document.getElementById('fModelo').value.trim();
   if (!modelo) { showToast('Modelo é obrigatório', 'error'); return; }
 
+  const flags = readFlags();
+
   const data = {
     tipo:          document.getElementById('fTipo').value,
     modelo,
-    placa:         document.getElementById('fPlaca').value.trim()            || null,
-    cor:           document.getElementById('fCor').value.trim()              || null,
-    ano:           parseInt(document.getElementById('fAno').value)           || null,
-    quilometragem: parseInt(document.getElementById('fKm').value)            || null,
+    placa:         document.getElementById('fPlaca').value.trim()         || null,
+    cor:           document.getElementById('fCor').value.trim()           || null,
+    ano:           parseInt(document.getElementById('fAno').value)        || null,
+    quilometragem: parseInt(document.getElementById('fKm').value)         || null,
     status:        document.getElementById('fStatus').value,
-    data_compra:   document.getElementById('fDataCompra').value              || null,
-    data_venda:    document.getElementById('fDataVenda')?.value              || null,
-    valor_compra:  getMoneyValue(document.getElementById('fValorCompra'))    || null,
-    valor_venda:   getMoneyValue(document.getElementById('fValorVenda'))     || null,
-    observacoes:   document.getElementById('fObs').value.trim()              || null,
+    data_compra:   document.getElementById('fDataCompra').value           || null,
+    data_venda:    document.getElementById('fDataVenda')?.value           || null,
+    valor_compra:  getMoneyValue(document.getElementById('fValorCompra')) || null,
+    valor_venda:   getMoneyValue(document.getElementById('fValorVenda'))  || null,
+    observacoes:   document.getElementById('fObs').value.trim()           || null,
+    flags,
   };
 
   const despesasValidas = readFormDespesas();
@@ -366,7 +419,7 @@ async function saveCarro(id) {
     }
     if (despesasValidas.length) {
       const { error } = await db.from('despesas_carros').insert(
-        despesasValidas.map(d => ({ carro_id: carroId, descricao: d.descricao.trim(), valor: d.valor }))
+        despesasValidas.map(d => ({ carro_id: carroId, descricao: d.descricao.trim(), valor: d.valor, data: d.data || null }))
       );
       if (error) throw error;
     }
@@ -391,6 +444,7 @@ async function deleteCarro(id) {
   } catch (err) { showToast('Erro ao excluir', 'error'); }
 }
 
+// ── Change Status com verificação de flags ──
 function openChangeStatus(id) {
   const carro = _carros.find(c => c.id === id);
   if (!carro) return;
@@ -422,16 +476,61 @@ function toggleDataVendaModal() {
 async function saveStatus(id) {
   const newStatus = document.getElementById('newStatus').value;
   const update    = { status: newStatus };
+
   if (isCarroVendido(newStatus)) {
     const dv = document.getElementById('newDataVenda')?.value;
     if (!dv) { showToast('Informe a data de venda', 'warning'); return; }
     update.data_venda = dv;
+
+    // Verifica flags
+    const carro = _carros.find(c => c.id === id);
+    const flags = getFlags(carro);
+    if (!allFlagsDone(flags)) {
+      const pendentes = FLAGS_CONFIG.filter(f => !flags[f.key]).map(f => f.label);
+      closeModal();
+      const choice = await showFlagsWarning(carro.modelo, pendentes, id, update);
+      return;
+    }
   }
+
+  await doSaveStatus(id, update);
+}
+
+async function showFlagsWarning(modelo, pendentes, id, update) {
+  return new Promise(resolve => {
+    buildModal(
+      'Flags incompletos',
+      `<div style="margin-bottom:14px;font-size:13.5px;color:var(--text)">
+        O veículo <strong>${esc(modelo)}</strong> ainda tem flags pendentes:
+      </div>
+      <div class="flags-warning-list">
+        ${pendentes.map(p => `<div class="flag-warning-item"><i data-lucide="alert-circle" style="width:14px;height:14px;color:var(--warning)"></i> ${p}</div>`).join('')}
+      </div>
+      <p style="margin-top:14px;font-size:13px;color:var(--text-muted)">Tem certeza que deseja marcar como vendido mesmo assim?</p>`,
+      `<button class="btn btn-secondary" onclick="openEditFromWarning('${id}')">Preencher flags</button>
+       <button class="btn btn-danger" onclick="confirmSaleAnyway('${id}', ${JSON.stringify(JSON.stringify(update))})">Sim, continuar</button>`,
+      '440px'
+    );
+    safeIcons(document.getElementById('modal'));
+  });
+}
+
+function openEditFromWarning(id) {
+  closeModal();
+  setTimeout(() => openEditCarro(id), 100);
+}
+
+async function confirmSaleAnyway(id, updateStr) {
+  closeModal();
+  const update = JSON.parse(updateStr);
+  await doSaveStatus(id, update);
+}
+
+async function doSaveStatus(id, update) {
   try {
     const { error } = await db.from('carros').update(update).eq('id', id);
     if (error) throw error;
     showToast('Status atualizado');
-    closeModal();
     await loadCarros();
   } catch (err) { showToast('Erro ao atualizar status', 'error'); }
 }
