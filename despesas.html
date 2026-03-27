@@ -25,15 +25,34 @@
         </button>
       </div>
     </div>
+
     <div class="content">
+
+      <!-- Cards por categoria -->
+      <div class="cards-section-label">Por categoria</div>
+      <div class="cards-grid" id="categoryCards" style="margin-bottom:24px">
+        <!-- preenchido pelo JS -->
+      </div>
+
+      <!-- Tabela -->
       <div class="table-card">
         <div class="table-header">
           <h3>Todas as Despesas</h3>
           <div class="table-controls">
             <div class="search-input">
               <span class="search-icon"><i data-lucide="search" style="width:13px;height:13px"></i></span>
-              <input class="form-input" id="searchInput" placeholder="Buscar descrição..." style="width:210px">
+              <input class="form-input" id="searchInput" placeholder="Buscar descrição..." style="width:180px">
             </div>
+            <select class="form-select" id="filterTipo" style="width:170px">
+              <option value="">Todos os tipos</option>
+              <option value="pos_venda">Pós Venda</option>
+              <option value="documentacao">Documentação</option>
+              <option value="taxa_transferencia">Taxa de Transferência</option>
+              <option value="preparacao">Preparação</option>
+              <option value="sistemas">Sistemas</option>
+              <option value="impostos">Impostos</option>
+              <option value="outros">Outros</option>
+            </select>
           </div>
         </div>
         <div class="table-responsive">
@@ -41,17 +60,18 @@
             <thead>
               <tr>
                 <th>Descrição</th>
+                <th>Tipo</th>
                 <th>Valor</th>
                 <th data-sort="data" class="sort-desc" style="cursor:pointer">Data</th>
                 <th>Ações</th>
               </tr>
             </thead>
             <tbody id="despesasBody">
-              <tr><td colspan="4"><div class="loading"><div class="spinner"></div> Carregando...</div></td></tr>
+              <tr><td colspan="5"><div class="loading"><div class="spinner"></div> Carregando...</div></td></tr>
             </tbody>
             <tfoot>
               <tr>
-                <td><strong>Total filtrado</strong></td>
+                <td colspan="2"><strong>Total filtrado</strong></td>
                 <td class="currency" id="footerTotal">—</td>
                 <td colspan="2"></td>
               </tr>
@@ -59,6 +79,7 @@
           </table>
         </div>
       </div>
+
     </div>
   </main>
 </div>

@@ -101,6 +101,16 @@ function formatCurrency(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 }
 
+// Auto-reduz fonte de .card-value quando o texto é longo
+function autoSizeCardValues() {
+  document.querySelectorAll('.card-value').forEach(el => {
+    const text = el.textContent || '';
+    el.classList.remove('value-md', 'value-sm');
+    if (text.length > 14) el.classList.add('value-sm');
+    else if (text.length > 10) el.classList.add('value-md');
+  });
+}
+
 function formatDate(dateStr) {
   if (!dateStr) return '—';
   const [y, m, d] = dateStr.split('-');
@@ -376,4 +386,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (hamburger) hamburger.addEventListener('click', toggleSidebar);
 
   safeIcons();
+  // Observer para redimensionar card values quando atualizados
+  const cardObserver = new MutationObserver(autoSizeCardValues);
+  document.querySelectorAll('.card-value').forEach(el => cardObserver.observe(el, { childList: true, characterData: true, subtree: true }));
+  autoSizeCardValues();
 });

@@ -119,6 +119,7 @@ function renderDespesasTable() {
       <tr>
         <td>${esc(d.descricao)}</td>
         <td class="currency">${formatCurrency(d.valor)}</td>
+        <td>${d.data ? formatDate(d.data) : '—'}</td>
         <td><div class="actions">
           <button class="btn btn-icon btn-xs" onclick="openEditDespesa('${d.id}')">
             <i data-lucide="pencil" style="width:13px;height:13px"></i></button>
@@ -133,14 +134,21 @@ function renderDespesasTable() {
 }
 
 function despesaFormHtml(d = null) {
+  const today = new Date().toISOString().split('T')[0];
   return `
     <div class="form-group">
       <label class="form-label">Descrição *</label>
       <input class="form-input" id="fDescricao" value="${esc(d?.descricao||'')}" placeholder="Ex: IPVA, revisão, funilaria...">
     </div>
-    <div class="form-group">
-      <label class="form-label">Valor (R$) *</label>
-      <input class="form-input money-input" id="fValor" placeholder="0,00">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Valor (R$) *</label>
+        <input class="form-input money-input" id="fValor" placeholder="0,00">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data</label>
+        <input class="form-input" type="date" id="fDataDesp" value="${d?.data || today}">
+      </div>
     </div>`;
 }
 
@@ -162,15 +170,16 @@ function openEditDespesa(id) {
 async function saveDespesa(id) {
   const descricao = document.getElementById('fDescricao').value.trim();
   const valor     = getMoneyValue(document.getElementById('fValor'));
+  const data      = document.getElementById('fDataDesp')?.value || null;
   if (!descricao) { showToast('Descrição é obrigatória', 'error'); return; }
   if (!valor || valor <= 0) { showToast('Informe um valor válido', 'error'); return; }
   try {
     if (id) {
-      const { error } = await db.from('despesas_carros').update({ descricao, valor }).eq('id', id);
+      const { error } = await db.from('despesas_carros').update({ descricao, valor, data }).eq('id', id);
       if (error) throw error;
       showToast('Despesa atualizada');
     } else {
-      const { error } = await db.from('despesas_carros').insert([{ carro_id: _carroId, descricao, valor }]);
+      const { error } = await db.from('despesas_carros').insert([{ carro_id: _carroId, descricao, valor, data }]);
       if (error) throw error;
       showToast('Despesa adicionada');
     }
