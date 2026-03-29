@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Despesas — Matheus Veículos</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <i data-lucide="menu" style="width:18px;height:18px"></i>
+        </button>
+        <span class="topbar-title">Despesas Gerais</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" id="btnAdd">
+          <i data-lucide="plus" style="width:14px;height:14px"></i> Adicionar
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Cards por categoria -->
+      <div class="cards-section-label">Por categoria</div>
+      <div class="cards-grid" id="categoryCards" style="margin-bottom:24px">
+        <!-- preenchido pelo JS -->
+      </div>
+
+      <!-- Tabela -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Todas as Despesas</h3>
+          <div class="table-controls">
+            <div class="search-input">
+              <span class="search-icon"><i data-lucide="search" style="width:13px;height:13px"></i></span>
+              <input class="form-input" id="searchInput" placeholder="Buscar descrição..." style="width:180px">
+            </div>
+            <select class="form-select" id="filterTipo" style="width:190px">
+              <option value="">Todos os tipos</option>
+              <option value="pos_venda">Pós Venda</option>
+              <option value="preparacao">Preparação</option>
+              <option value="oficina">Oficina</option>
+              <option value="salario">Salário</option>
+              <option value="retirada">Retirada</option>
+              <option value="impostos">Impostos</option>
+              <option value="comissao">Comissão</option>
+              <option value="marketing">Marketing</option>
+              <option value="combustivel">Combustível</option>
+              <option value="vistoria">Vistoria</option>
+              <option value="documentacao">Documentação</option>
+              <option value="sistemas">Sistemas</option>
+              <option value="terceiros">Terceiros</option>
+              <option value="aluguel">Aluguel</option>
+              <option value="internet">Internet</option>
+              <option value="energia">Energia</option>
+              <option value="agua">Água</option>
+              <option value="taxa_transferencia">Taxa de Transferência</option>
+              <option value="outros">Outros</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Descrição</th>
+                <th>Tipo</th>
+                <th>Valor</th>
+                <th data-sort="data" class="sort-desc" style="cursor:pointer">Data</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="despesasBody">
+              <tr><td colspan="5"><div class="loading"><div class="spinner"></div> Carregando...</div></td></tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2"><strong>Total filtrado</strong></td>
+                <td class="currency" id="footerTotal">—</td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<script src="supabase-config.js"></script>
+<script src="app.js"></script>
+<script src="despesas.js"></script>
+</body>
+</html>
